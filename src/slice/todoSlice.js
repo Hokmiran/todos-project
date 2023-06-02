@@ -1,10 +1,42 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from 'axios'
 
 const initialState = {
     count: 0,
     todos: [],
     active: "all"
 };
+
+export const getAllData = createAsyncThunk("fetch/todos", async () => {
+    const res = await axios.get("http://localhost:8000/todos/api");
+    return res.data;
+  });
+  export const postTodo = createAsyncThunk("post/todos", async (obj) => {
+    const res = await axios.post("http://localhost:8000/todos/api", obj);
+    return res.data;
+  });
+  export const deleteTodo = createAsyncThunk("delete/todo", async (id) => {
+    const res = await axios.delete("http://localhost:8000/todos/api/" + id);
+    return res.data;
+  });
+  export const handleCheckTodo = createAsyncThunk(
+    "handleCheck/todo",
+    async (payload) => {
+      const res = await axios.put(
+        "http://localhost:8000/todos/api/" + payload.id,
+        payload.updatedObj
+      );
+      return res.data;
+    }
+  );
+  export const deleteCompletedTodoAction = createAsyncThunk(
+    "deleteCompleted/todos",
+    async (completedTodos, { dispatch }) => {
+      await axios
+        .put("http://localhost:8000/todos/api/delete/completed", completedTodos)
+        .then(() => dispatch(getAllData()));
+    }
+  );
 
 
 export const todoSlice = createSlice({
